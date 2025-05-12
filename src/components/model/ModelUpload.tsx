@@ -5,7 +5,7 @@ const ModelUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [detectionResults, setDetectionResults] = useState<Array<{
-    class: string;
+    class: 'Oxygen Tank' | 'Toolbox';
     confidence: number;
     bbox: [number, number, number, number];
   }> | null>(null);
@@ -15,6 +15,7 @@ const ModelUpload: React.FC = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     setError(null);
+    setDetectionResults(null);
     
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -42,6 +43,7 @@ const ModelUpload: React.FC = () => {
       // In production, this would make an API call to your model endpoint
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate processing time
       
+      // Only detect Oxygen Tanks and Toolboxes
       setDetectionResults([
         {
           class: 'Toolbox',
@@ -65,12 +67,12 @@ const ModelUpload: React.FC = () => {
     <div className="py-12 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Model Testing</h2>
+          <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Object Detection</h2>
           <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            Upload and Test
+            Detect Space Station Equipment
           </p>
           <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
-            Test our model with your own images to see how it performs in detecting space station objects.
+            Upload an image to detect oxygen tanks and toolboxes in space station environments.
           </p>
         </div>
 
@@ -117,7 +119,9 @@ const ModelUpload: React.FC = () => {
                       {detectionResults.map((result, index) => (
                         <div
                           key={index}
-                          className="absolute border-2 border-blue-500"
+                          className={`absolute border-2 ${
+                            result.class === 'Oxygen Tank' ? 'border-blue-500' : 'border-green-500'
+                          }`}
                           style={{
                             left: `${result.bbox[0]}px`,
                             top: `${result.bbox[1]}px`,
@@ -125,7 +129,9 @@ const ModelUpload: React.FC = () => {
                             height: `${result.bbox[3] - result.bbox[1]}px`
                           }}
                         >
-                          <div className="absolute -top-6 left-0 bg-blue-500 text-white px-2 py-1 text-xs rounded">
+                          <div className={`absolute -top-6 left-0 ${
+                            result.class === 'Oxygen Tank' ? 'bg-blue-500' : 'bg-green-500'
+                          } text-white px-2 py-1 text-xs rounded`}>
                             {result.class} ({(result.confidence * 100).toFixed(1)}%)
                           </div>
                         </div>
@@ -154,7 +160,9 @@ const ModelUpload: React.FC = () => {
                           className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg"
                         >
                           <div className="flex items-center">
-                            <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                            <CheckCircle className={`h-5 w-5 ${
+                              result.class === 'Oxygen Tank' ? 'text-blue-500' : 'text-green-500'
+                            } mr-2`} />
                             <span className="font-medium">{result.class}</span>
                           </div>
                           <span className="text-sm text-gray-500">
